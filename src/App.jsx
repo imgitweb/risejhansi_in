@@ -21,6 +21,7 @@ import Ramp from './pages/Ramp';
 import RampApplicationForm from './pages/RampApplicationForm';
 import RiseStartups from './pages/RiseStartups';
 import JoltPortal from './pages/JoltPortal';
+import AboutUs from "./pages/AboutUs"
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <div className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/about-us" element={<AboutUs />} />
             <Route path="/news-and-events" element={<NewsEvents />} />
             <Route path="/women-cell" element={<WomenCell />} />
             <Route path="/startup-registration" element={<StartupRegistration />} />

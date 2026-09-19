@@ -1,6 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // Link import kiya gaya hai
-// Lucide icons import
+import { Link } from 'react-router-dom';
 import { Mail, MapPin, ChevronRight } from 'lucide-react';
 
 // Importing logo directly from src/img folder
@@ -9,13 +8,13 @@ import logo from '../img/logo-web.png';
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
-  // Internal Links ke arrays banaye gaye hain taaki path aur name dono map ho sakein
+  // Internal Links updated exactly as per App.js routes
   const quickLinks = [
     { name: 'Home', path: '/' },
-    { name: 'About Us', path: '/about' },
-    { name: 'News & Events', path: '/news' },
-    { name: 'Services', path: '/services' },
-    { name: 'Contact Us', path: '/contact' }
+    { name: 'About Us', path: '/about-us' },
+    { name: 'News & Events', path: '/news-and-events' },
+    { name: 'Women Cell', path: '/women-cell' }, 
+    { name: 'Contact Us', path: '/contact-us' }
   ];
 
   const joinLinks = [
