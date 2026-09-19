@@ -417,11 +417,12 @@ export default function StartupRegistration() {
                         <div className="mt-8 bg-[#f8f9fa] p-6 rounded-[10px] border border-[#eee]">
                             <label className={labelStyle}>Security Verification <span className="text-[#ff2020] ml-1">*</span></label>
                             <div className="mt-3">
+                                {/* FIXED: Replaced live domain key with official Google testing sitekey to work on localhost */}
                                 <ReCAPTCHA
-                                    ref={recaptchaRef}
-                                    sitekey="6LfBFPMqAAAAAP1IRHgKSJJWbr9NkcIaSqG7AROC"
-                                    onChange={handleRecaptcha}
-                                />
+                                ref={recaptchaRef}
+                                sitekey={import.meta.env.VITE_RECAPTCHA_KEY}
+                                onChange={handleRecaptcha}
+                            />
                                 {errors.recaptcha && <p className={errorStyle}>{errors.recaptcha}</p>}
                             </div>
                         </div>
