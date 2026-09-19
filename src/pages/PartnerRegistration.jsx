@@ -1,0 +1,367 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Building, User, Mail, Phone, MapPin, Send, Globe, FileText, Image as ImageIcon, Briefcase } from 'lucide-react';
+import ReCAPTCHA from "react-google-recaptcha";
+import axios from 'axios';
+import API_URL from "../components/Config"; // Load API URL from Config
+import locationData from '../data/locationdata.json'; // Load local JSON data
+
+gsap.registerPlugin(ScrollTrigger);
+
+export default function PartnerRegistration() {
+  const pageRef = useRef(null);
+  const bannerTextRef = useRef(null);
+  const formRef = useRef(null);
+  const recaptchaRef = useRef(null);
+
+  // Form State combining both API requirements
+  const [formData, setFormData] = useState({
+    firmName: '',        // Maps to name_of_farm (Legacy) & companyName (Node)
+    contactName: '',     // Maps to name (Node)
+    email: '',           // Maps to email (Both)
+    mobile: '',          // Maps to mobile (Legacy) & contactNumber (Node)
+    designation: '',     // Maps to designation (Node)
+    
+    country: '',         // Storing string names now
+    state: '',           // Storing string names now
+    city: '',            // Storing string names now
+    
+    partnerType: '',     // Maps to partnerType enum (Node) & specify_your_type (Legacy)
+    industry: '',        // Maps to industry (Node)
+    linkedinUrl: '',     // Maps to linkedin (Legacy) & linkedinUrl (Node)
+    websiteUrl: '',      // Maps to websiteUrl (Node)
+    description: '',     // Maps to description (Node)
+    
+    image: null,         // Maps to imageUrl (Node via multer)
+    bot_field: ''        // Honeypot
+  });
+
+  const [errors, setErrors] = useState({});
+  const [captchaToken, setCaptchaToken] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Derived states for location dropdowns based on JSON
+  const countriesList = locationData?.countries || [];
+  const indiaStates = locationData?.indiaData ? Object.keys(locationData.indiaData) : [];
+  
+  // Get cities list if "India" and a valid state is selected
+  const availableCities = (formData.country === 'India' && formData.state && locationData?.indiaData[formData.state]) 
+      ? locationData.indiaData[formData.state] 
+      : [];
+
+  // GSAP Animations
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from(bannerTextRef.current, { y: 40, opacity: 0, duration: 1, ease: "power4.out", delay: 0.1 });
+      gsap.from(formRef.current, { y: 50, opacity: 0, duration: 1, ease: "power4.out", delay: 0.3 });
+    }, pageRef);
+    return () => ctx.revert();
+  }, []);
+
+  // Handlers
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'mobile') {
+      const onlyNums = value.replace(/[^0-9]/g, '');
+      setFormData({ ...formData, [name]: onlyNums });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+    if (errors[name]) setErrors({ ...errors, [name]: null });
+  };
+
+  const handleFileChange = (e) => {
+    setFormData({ ...formData, image: e.target.files[0] });
+  };
+
+  const handleCountryChange = (e) => {
+    const val = e.target.value;
+    setFormData({ ...formData, country: val, state: '', city: '' });
+    if (errors.country) setErrors({ ...errors, country: null });
+  };
+
+  const handleStateChange = (e) => {
+    const val = e.target.value;
+    setFormData({ ...formData, state: val, city: '' });
+    if (errors.state) setErrors({ ...errors, state: null });
+  };
+
+  const handleRecaptcha = (token) => {
+    setCaptchaToken(token);
+    if (errors.recaptcha) setErrors({ ...errors, recaptcha: null });
+  };
+
+  const validateForm = () => {
+    let newErrors = {};
+    let isValid = true;
+    const requiredFields = ['firmName', 'contactName', 'email', 'mobile', 'country', 'state', 'city', 'partnerType'];
+    
+    requiredFields.forEach(field => {
+      if (!formData[field] || String(formData[field]).trim() === '') {
+        newErrors[field] = 'Required';
+        isValid = false;
+      }
+    });
+
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Invalid email';
+      isValid = false;
+    }
+
+    if (!captchaToken) {
+      newErrors.recaptcha = 'Verify captcha';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (formData.bot_field !== '') return; // Honeypot trap
+
+    if (validateForm()) {
+      setIsSubmitting(true);
+
+      // Extract Incubation ID securely from env variables
+      const incubationId = import.meta.env.VITE_INCUBATION_ID || "6a74ea248ade09560b5dc48c";
+      const nodeEndpoint = API_URL ? `${API_URL}/partners/register` : 'http://localhost:5000/api/partners/register';
+
+      // --- 1. Payload for Node.js API (Mongoose Model) ---
+      const nodePayload = new FormData();
+      nodePayload.append('incubationId', incubationId); // Goes ONLY to Node
+      if (formData.image) nodePayload.append('image', formData.image);
+      nodePayload.append('name', formData.contactName);
+      nodePayload.append('companyName', formData.firmName);
+      nodePayload.append('designation', formData.designation);
+      nodePayload.append('email', formData.email);
+      nodePayload.append('contactNumber', formData.mobile);
+      nodePayload.append('linkedinUrl', formData.linkedinUrl);
+      nodePayload.append('websiteUrl', formData.websiteUrl);
+      nodePayload.append('location', `${formData.city}, ${formData.state}, ${formData.country}`);
+      nodePayload.append('industry', formData.industry);
+      nodePayload.append('description', formData.description);
+      
+      // Map to Node Enum: ['Investor', 'Mentor', 'Other', 'Legal']
+      const validTypes = ['Investor', 'Mentor', 'Legal'];
+      const mappedNodePartnerType = validTypes.includes(formData.partnerType) ? formData.partnerType : 'Other';
+      nodePayload.append('partnerType', mappedNodePartnerType);
+
+      // --- 2. Payload for RiseJhansi API ---
+      const risePayload = new FormData();
+      risePayload.append('name_of_farm', formData.firmName);
+      risePayload.append('email', formData.email);
+      risePayload.append('mobile', formData.mobile);
+      risePayload.append('country', formData.country); // Sending string Name instead of ID
+      risePayload.append('state', formData.state);
+      risePayload.append('city', formData.city);
+      risePayload.append('specify_your_type', formData.partnerType); 
+      risePayload.append('linkedin', formData.linkedinUrl);
+      risePayload.append('code_again', 'BYPASS');
+      risePayload.append('captcha', captchaToken);
+
+      try {
+        const [nodeRes, riseRes] = await Promise.allSettled([
+          axios.post(nodeEndpoint, nodePayload),
+          axios.post('https://risejhansi.in/PartnerController/savePartner', risePayload)
+        ]);
+
+        const isNodeSuccess = nodeRes.status === 'fulfilled' && nodeRes.value.status >= 200 && nodeRes.value.status < 300;
+        const isRiseSuccess = riseRes.status === 'fulfilled' && riseRes.value.status >= 200 && riseRes.value.status < 300;
+
+        if (isNodeSuccess || isRiseSuccess) {
+          alert("Partner Registration Successful!");
+          window.location.reload(); 
+        } else {
+          alert("Failed to register. Please try again.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Network error occurred.");
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // UI Styles
+  const inputStyle = "w-full px-[16px] py-[12px] rounded-[10px] border-2 border-[#eee] focus:border-[#ff2020] focus:ring-2 focus:ring-[#ff2020]/10 outline-none transition-all text-[#555] bg-[#f8f9fa] focus:bg-white text-[0.95rem]";
+  const labelStyle = "flex items-center text-[0.95rem] font-bold text-[#333] mb-2";
+  const errorStyle = "text-[#ff2020] text-[0.8rem] mt-1.5 font-medium";
+
+  return (
+    <main ref={pageRef} className="flex-grow bg-[#fdfdfd] min-h-screen pt-20 pb-24 font-['Poppins',sans-serif]">
+      
+      {/* ================= TOP BANNER (Premium Dark Theme) ================= */}
+      <div className="w-full bg-[#1a1a1a] py-24 relative overflow-hidden shadow-inner">
+        <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[60%] rounded-full bg-[#ff2020]/15 blur-[120px]"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[60%] rounded-full bg-[#ff2020]/10 blur-[100px]"></div>
+        
+        <div ref={bannerTextRef} className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+          <div className="inline-block px-[16px] py-[6px] rounded-full bg-[#ff2020]/10 border border-[#ff2020]/30 text-[#ff2020] font-semibold text-sm mb-6 backdrop-blur-sm shadow-sm">
+            Collaborate For Impact
+          </div>
+          <h1 className="text-[2.5rem] md:text-[3.5rem] lg:text-[4rem] font-extrabold text-white tracking-tight mb-6 leading-tight">
+            Partner <span className="text-[#ff2020]">Registration</span>
+          </h1>
+          <p className="text-[#aaa] text-[1.1rem] font-medium max-w-2xl mx-auto leading-relaxed">
+            Partner with RISE Jhansi to nurture entrepreneurship, mentor innovators, and drive ecosystem growth in Uttar Pradesh.
+          </p>
+        </div>
+      </div>
+
+      {/* ================= FORM CONTAINER ================= */}
+      <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+        <div ref={formRef} className="bg-white p-[30px] md:p-[50px] rounded-[20px] shadow-[0_15px_40px_rgba(0,0,0,0.06)] border border-[#eee] border-t-[5px] border-t-[#ff2020]">
+          <form onSubmit={handleSubmit} noValidate>
+            
+            {/* Honeypot */}
+            <input type="text" name="bot_field" value={formData.bot_field} onChange={handleChange} className="hidden" />
+
+            {/* --- 1. FIRM & CONTACT DETAILS --- */}
+            <div className="mb-10">
+              <h3 className="text-[1.3rem] font-bold text-[#333] mb-6 flex items-center border-b border-[#eee] pb-3">
+                <Building className="w-5 h-5 mr-2 text-[#ff2020]" /> Firm & Contact Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className={labelStyle}>Name Of Firm / Organization <span className="text-[#ff2020] ml-1">*</span></label>
+                  <input type="text" name="firmName" className={`${inputStyle} ${errors.firmName ? 'border-[#ff2020]' : ''}`} value={formData.firmName} onChange={handleChange} placeholder="Company / Institution Name" />
+                  {errors.firmName && <p className={errorStyle}>{errors.firmName}</p>}
+                </div>
+                <div>
+                  <label className={labelStyle}>Contact Person Name <span className="text-[#ff2020] ml-1">*</span></label>
+                  <input type="text" name="contactName" className={`${inputStyle} ${errors.contactName ? 'border-[#ff2020]' : ''}`} value={formData.contactName} onChange={handleChange} placeholder="Full Name" />
+                  {errors.contactName && <p className={errorStyle}>{errors.contactName}</p>}
+                </div>
+                <div>
+                  <label className={labelStyle}><Mail className="w-4 h-4 mr-1 text-[#ff2020]"/> Official Email <span className="text-[#ff2020] ml-1">*</span></label>
+                  <input type="email" name="email" className={`${inputStyle} ${errors.email ? 'border-[#ff2020]' : ''}`} value={formData.email} onChange={handleChange} placeholder="email@organization.com" />
+                  {errors.email && <p className={errorStyle}>{errors.email}</p>}
+                </div>
+                <div>
+                  <label className={labelStyle}><Phone className="w-4 h-4 mr-1 text-[#ff2020]"/> Mobile Number <span className="text-[#ff2020] ml-1">*</span></label>
+                  <input type="tel" name="mobile" className={`${inputStyle} ${errors.mobile ? 'border-[#ff2020]' : ''}`} value={formData.mobile} onChange={handleChange} placeholder="10-digit number" />
+                  {errors.mobile && <p className={errorStyle}>{errors.mobile}</p>}
+                </div>
+                <div>
+                  <label className={labelStyle}>Designation <span className="text-[#aaa] font-normal ml-1">(Optional)</span></label>
+                  <input type="text" name="designation" className={inputStyle} value={formData.designation} onChange={handleChange} placeholder="Your Role / Title" />
+                </div>
+                <div>
+                  <label className={labelStyle}><ImageIcon className="w-4 h-4 mr-1 text-[#ff2020]" /> Firm Logo / Image <span className="text-[#aaa] font-normal ml-1">(Optional)</span></label>
+                  <input type="file" accept="image/*" className={`${inputStyle} bg-white`} onChange={handleFileChange} />
+                </div>
+              </div>
+            </div>
+
+            {/* --- 2. PARTNERSHIP DETAILS --- */}
+            <div className="mb-10">
+              <h3 className="text-[1.3rem] font-bold text-[#333] mb-6 flex items-center border-b border-[#eee] pb-3">
+                <Briefcase className="w-5 h-5 mr-2 text-[#ff2020]" /> Partnership Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className={labelStyle}>Partner Type / Category <span className="text-[#ff2020] ml-1">*</span></label>
+                  <select name="partnerType" className={`${inputStyle} ${errors.partnerType ? 'border-[#ff2020]' : ''}`} value={formData.partnerType} onChange={handleChange}>
+                    <option value="">Select Type</option>
+                    <option value="Corporate">Corporate / Industry</option>
+                    <option value="Academic Institution">Academic Institution</option>
+                    <option value="Government Body">Government Body</option>
+                    <option value="NGO">NGO / Non-Profit</option>
+                    <option value="Investor">Investor Network</option>
+                    <option value="Legal">Legal Advisor</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  {errors.partnerType && <p className={errorStyle}>{errors.partnerType}</p>}
+                </div>
+                <div>
+                  <label className={labelStyle}>Industry / Sector <span className="text-[#aaa] font-normal ml-1">(Optional)</span></label>
+                  <input type="text" name="industry" className={inputStyle} value={formData.industry} onChange={handleChange} placeholder="e.g. EdTech, Finance, Healthcare" />
+                </div>
+                <div>
+                  <label className={labelStyle}><Globe className="w-4 h-4 mr-1 text-[#ff2020]" /> Website URL <span className="text-[#aaa] font-normal ml-1">(Optional)</span></label>
+                  <input type="url" name="websiteUrl" className={inputStyle} value={formData.websiteUrl} onChange={handleChange} placeholder="https://..." />
+                </div>
+                <div>
+                  <label className={labelStyle}>LinkedIn URL <span className="text-[#aaa] font-normal ml-1">(Optional)</span></label>
+                  <input type="url" name="linkedinUrl" className={inputStyle} value={formData.linkedinUrl} onChange={handleChange} placeholder="https://linkedin.com/company/..." />
+                </div>
+                <div className="md:col-span-2">
+                  <label className={labelStyle}><FileText className="w-4 h-4 mr-1 text-[#ff2020]" /> Partnership Proposal / Description <span className="text-[#aaa] font-normal ml-1">(Optional)</span></label>
+                  <textarea name="description" rows="3" className={`${inputStyle} resize-none`} value={formData.description} onChange={handleChange} placeholder="How would you like to collaborate with us?"></textarea>
+                </div>
+              </div>
+            </div>
+
+            {/* --- 3. LOCATION --- */}
+            <div className="mb-10">
+              <h3 className="text-[1.3rem] font-bold text-[#333] mb-6 flex items-center border-b border-[#eee] pb-3">
+                <MapPin className="w-5 h-5 mr-2 text-[#ff2020]" /> Location
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <select name="country" className={`${inputStyle} ${errors.country ? 'border-[#ff2020]' : ''}`} value={formData.country} onChange={handleCountryChange}>
+                    <option value="">Select Country</option>
+                    {countriesList.map((c, idx) => <option key={idx} value={c}>{c}</option>)}
+                  </select>
+                  {errors.country && <p className={errorStyle}>{errors.country}</p>}
+                </div>
+                <div>
+                  {formData.country === 'India' ? (
+                    <select name="state" className={`${inputStyle} ${errors.state ? 'border-[#ff2020]' : ''}`} value={formData.state} onChange={handleStateChange}>
+                      <option value="">Select State</option>
+                      {indiaStates.map((s, idx) => <option key={idx} value={s}>{s}</option>)}
+                    </select>
+                  ) : (
+                    <input type="text" name="state" placeholder="Enter State" value={formData.state} onChange={handleChange} className={`${inputStyle} ${errors.state ? 'border-[#ff2020]' : ''}`} disabled={!formData.country} />
+                  )}
+                  {errors.state && <p className={errorStyle}>{errors.state}</p>}
+                </div>
+                <div>
+                  {formData.country === 'India' && availableCities.length > 0 ? (
+                    <select name="city" className={`${inputStyle} ${errors.city ? 'border-[#ff2020]' : ''}`} value={formData.city} onChange={handleChange}>
+                      <option value="">Select City</option>
+                      {availableCities.map((c, idx) => <option key={idx} value={c}>{c}</option>)}
+                    </select>
+                  ) : (
+                    <input type="text" name="city" placeholder="Enter City" value={formData.city} onChange={handleChange} className={`${inputStyle} ${errors.city ? 'border-[#ff2020]' : ''}`} disabled={!formData.state} />
+                  )}
+                  {errors.city && <p className={errorStyle}>{errors.city}</p>}
+                </div>
+              </div>
+            </div>
+
+            {/* Google reCAPTCHA */}
+            <div className="mb-8 bg-[#f8f9fa] p-6 rounded-[10px] border border-[#eee]">
+              <label className={labelStyle}>Security Verification <span className="text-[#ff2020] ml-1">*</span></label>
+              <div className="mt-3">
+                <ReCAPTCHA ref={recaptchaRef} sitekey="6LfBFPMqAAAAAP1IRHgKSJJWbr9NkcIaSqG7AROC" onChange={handleRecaptcha} />
+                {errors.recaptcha && <p className={errorStyle}>{errors.recaptcha}</p>}
+              </div>
+            </div>
+
+            <div className="text-center">
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="inline-flex items-center justify-center px-[50px] py-[18px] bg-[#ff2020] hover:bg-[#d81c28] text-white font-bold rounded-[50px] text-[1.1rem] shadow-[0_10px_20px_rgba(255,32,32,0.25)] border-2 border-[#ff2020] transition-all disabled:opacity-70 disabled:cursor-not-allowed hover:-translate-y-1"
+              >
+                {isSubmitting ? (
+                  <><span className="inline-block w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin mr-[10px] align-middle"></span> Processing...</>
+                ) : (
+                  <><Send className="w-5 h-5 mr-2" /> Register as Partner</>
+                )}
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </main>
+  );
+}
