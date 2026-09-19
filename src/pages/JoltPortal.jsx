@@ -223,9 +223,13 @@ export default function JoltPortal() {
       {/* --- HERO SECTION --- */}
       <section id="home" className="bg-gradient-to-br from-[#fff5f5] to-[#ffffff] pt-[50px] pb-[100px]">
         <div className="max-w-[1200px] mx-auto px-[20px]">
-          <div className="relative text-center pb-[40px]">
-            <img src="/assets/img/yogiji.jpeg" alt="Banner Image" className="max-w-full w-full h-auto rounded-[12px] block" />
-          </div>
+          <div className="relative text-center pt-20 pb-10">
+                      <img 
+                        src={yogiji} 
+                        alt="JOLT Banner" 
+                        className="w-full h-auto rounded-xl mx-auto block max-w-7xl shadow-md object-cover" 
+                      />
+                    </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-[50px] items-center text-center lg:text-left">
             <div>
