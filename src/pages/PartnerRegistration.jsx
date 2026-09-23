@@ -109,10 +109,11 @@ export default function PartnerRegistration() {
       isValid = false;
     }
 
-    if (!captchaToken) {
-      newErrors.recaptcha = 'Verify captcha';
-      isValid = false;
-    }
+    // YAHAN SE CAPTCHA VALIDATION HATA DIYA GAYA HAI
+    // if (!captchaToken) {
+    //   newErrors.recaptcha = 'Verify captcha';
+    //   isValid = false;
+    // }
 
     setErrors(newErrors);
     return isValid;
@@ -160,7 +161,9 @@ export default function PartnerRegistration() {
       risePayload.append('specify_your_type', formData.partnerType); 
       risePayload.append('linkedin', formData.linkedinUrl);
       risePayload.append('code_again', 'BYPASS');
-      risePayload.append('captcha', captchaToken);
+      
+      // YAHAN FALLBACK ADD KIYA GAYA HAI
+      risePayload.append('captcha', captchaToken || '');
 
       try {
         const [nodeRes, riseRes] = await Promise.allSettled([
@@ -338,10 +341,10 @@ export default function PartnerRegistration() {
 
             {/* Google reCAPTCHA */}
             <div className="mb-8 bg-[#f8f9fa] p-6 rounded-[10px] border border-[#eee]">
-              <label className={labelStyle}>Security Verification <span className="text-[#ff2020] ml-1">*</span></label>
+              {/* YAHAN OPTIONAL LIKH DIYA GAYA HAI */}
+              <label className={labelStyle}>Security Verification <span className="text-[#aaa] font-normal ml-1">(Optional)</span></label>
               <div className="mt-3">
                 <ReCAPTCHA ref={recaptchaRef} sitekey="6LfBFPMqAAAAAP1IRHgKSJJWbr9NkcIaSqG7AROC" onChange={handleRecaptcha} />
-                {errors.recaptcha && <p className={errorStyle}>{errors.recaptcha}</p>}
               </div>
             </div>
 

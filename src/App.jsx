@@ -1,10 +1,10 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
 // Components
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Chatbot from './components/Chatbot'; // <-- Chatbot import kiya gaya hai
+import Chatbot from './components/Chatbot';
 
 // Pages
 import Home from './pages/Home';
@@ -21,11 +21,26 @@ import Ramp from './pages/Ramp';
 import RampApplicationForm from './pages/RampApplicationForm';
 import RiseStartups from './pages/RiseStartups';
 import JoltPortal from './pages/JoltPortal';
-import AboutUs from "./pages/AboutUs"
+import AboutUs from "./pages/AboutUs";
+
+// 1. ScrollToTop Component banayein
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    // Jab bhi pathname (URL) change hoga, page top par scroll ho jayega
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 function App() {
   return (
     <Router>
+      {/* 2. ScrollToTop ko Router ke andar add karein */}
+      <ScrollToTop />
+      
       <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased">
         {/* Header sabhi pages par dikhega */}
         <Header />
@@ -53,8 +68,7 @@ function App() {
         {/* Footer sabhi pages par dikhega */}
         <Footer />
 
-        {/* <-- CHATBOT YAHAN ADD KIYA HAI --> */}
-        {/* Ye Routes ke bahar hai, isliye website ke har page par bottom-right mein dikhega */}
+        {/* Chatbot sabhi pages par bottom-right mein dikhega */}
         <Chatbot />
       </div>
     </Router>

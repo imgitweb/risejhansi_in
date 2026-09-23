@@ -1,8 +1,11 @@
+// ==========================================
+// 3. Services.jsx
+// ==========================================
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ArrowRight } from 'lucide-react';
 
-// Importing images directly from src/img/
 import service1 from '../../img/service_1.png';
 import service2 from '../../img/service_2.png';
 import service3 from '../../img/service_3.png';
@@ -20,92 +23,33 @@ const Services = () => {
   const cardsRef = useRef([]);
 
   const servicesData = [
-    {
-      id: 1,
-      title: "Mentorship and Handholding",
-      image: service1,
-      desc: "We pair you with experienced mentors who provide strategic guidance to accelerate your business growth and development."
-    },
-    {
-      id: 2,
-      title: "Funding Support",
-      image: service2,
-      desc: "We continuously explore innovative fundraising concepts to connect your startup with potential investors and financial resources."
-    },
-    {
-      id: 3,
-      title: "Co-Working Space with IT enable",
-      image: service3,
-      desc: "Our technology-equipped workspace provides an ideal environment for collaboration, innovation, and enhanced productivity."
-    },
-    {
-      id: 4,
-      title: "Women Startup Program",
-      image: service4,
-      desc: "We empower women entrepreneurs by providing specialized resources and support to transform innovative ideas into successful businesses."
-    },
-    {
-      id: 5,
-      title: "Launchpad",
-      image: service5,
-      desc: "Our stimulating environment combines creativity, expert guidance, practical advice, and peer collaboration to help establish your business foundation."
-    },
-    {
-      id: 6,
-      title: "Modern Prototyping Lab",
-      image: service6,
-      desc: "Our facility helps innovators transform concepts into working prototypes using digital fabrication tools and specialized equipment."
-    },
-    {
-      id: 7,
-      title: "Business Model & Marketing",
-      image: service7,
-      desc: "We guide startups in developing effective business models and creating strategic marketing plans to reach their target audience."
-    },
-    {
-      id: 8,
-      title: "Grant & Investment",
-      image: service8,
-      desc: "We assist startups in preparing compelling investment pitches and navigating various government and private grant opportunities."
-    }
+    { id: 1, title: "Mentorship & Handholding", image: service1, desc: "Pairing with experienced mentors providing strategic guidance to accelerate your growth." },
+    { id: 2, title: "Funding Support", image: service2, desc: "Explore innovative fundraising concepts to connect with potential investors and resources." },
+    { id: 3, title: "IT Co-Working Space", image: service3, desc: "Technology-equipped workspace for collaboration, innovation, and enhanced productivity." },
+    { id: 4, title: "Women Startup Program", image: service4, desc: "Empowering women entrepreneurs by providing specialized resources to transform ideas." },
+    { id: 5, title: "Launchpad", image: service5, desc: "A stimulating environment combining creativity, guidance, and peer collaboration." },
+    { id: 6, title: "Modern Prototyping Lab", image: service6, desc: "Transform concepts into working prototypes using digital fabrication tools." },
+    { id: 7, title: "Business Model & Marketing", image: service7, desc: "Guiding startups in developing effective models and strategic marketing plans." },
+    { id: 8, title: "Grant & Investment", image: service8, desc: "Assisting in preparing compelling pitches and navigating grant opportunities." }
   ];
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // 1. Header Animation
-      gsap.fromTo(headerRef.current,
-        { y: 40, opacity: 0 },
-        {
-          scrollTrigger: {
-            trigger: headerRef.current,
-            start: "top 85%", 
-            toggleActions: "play none none none",
-          },
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: "power4.out"
-        }
+      // Header Animation
+      gsap.fromTo(headerRef.current.children,
+        { y: 50, opacity: 0 },
+        { scrollTrigger: { trigger: headerRef.current, start: "top 80%" }, y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: "power3.out" }
       );
 
-      // 2. Individual Card Animation
+      // Advanced Card Stagger
       cardsRef.current.forEach((card, index) => {
         if (!card) return;
-        
         gsap.fromTo(card,
-          { y: 60, opacity: 0, scale: 0.95 },
+          { y: 80, opacity: 0, scale: 0.95 },
           {
-            scrollTrigger: {
-              trigger: card,
-              start: "top 90%",
-              toggleActions: "play none none none",
-            },
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            duration: 0.8,
-            ease: "power4.out",
-            delay: (index % 3) * 0.15 // Stagger effect by column
+            scrollTrigger: { trigger: card, start: "top 85%" },
+            y: 0, opacity: 1, scale: 1, duration: 0.8, ease: "power4.out",
+            delay: (index % 4) * 0.1 // Stagger by row position
           }
         );
       });
@@ -115,71 +59,61 @@ const Services = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-20 lg:py-28 bg-[#f8f9fa] overflow-hidden font-['Poppins',sans-serif]" id="services">
+    <section ref={sectionRef} className="py-24 lg:py-32 bg-[#f4f4f6] relative font-['Poppins',sans-serif]" id="services">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Section Header */}
-        <div ref={headerRef} className="text-center max-w-3xl mx-auto mb-16 opacity-0">
-          {/* Theme Badge */}
-          <div className="inline-block px-[16px] py-[6px] rounded-full bg-[#fff5f5] border border-[#ff2020]/20 text-[#ff2020] font-semibold text-sm mb-4 shadow-sm">
-            What We Offer
+        {/* Header Section */}
+        <div ref={headerRef} className="text-center max-w-3xl mx-auto mb-20">
+          <div className="inline-flex items-center gap-2 mb-4">
+            <span className="w-8 h-[2px] bg-[#ff2020]"></span>
+            <span className="text-[#ff2020] font-black tracking-widest uppercase text-sm">Ecosystem</span>
+            <span className="w-8 h-[2px] bg-[#ff2020]"></span>
           </div>
-          
-          <h2 className="text-[2.5rem] md:text-[3rem] lg:text-[3.5rem] font-extrabold text-[#333] tracking-tight leading-tight mb-4">
-            Our <span className="text-[#ff2020] relative after:content-[''] after:absolute after:bottom-[8px] after:left-0 after:w-full after:h-[12px] after:bg-[#ff2020]/10 after:z-[-1]">Services</span>
+          <h2 className="text-[3rem] lg:text-[4rem] font-black text-[#1a1a1a] tracking-tight leading-[1.1] mb-6">
+            Comprehensive <br/> <span className="text-[#ff2020]">Startup Support</span>
           </h2>
-          
-          {/* Red Accent Divider */}
-          <div className="w-[80px] h-[5px] bg-[#ff2020] rounded-full mx-auto mt-4 mb-6"></div>
-          
-          <p className="text-[1.1rem] text-[#555] leading-relaxed">
-            Rani Laxmibai Incubator for Sustainable Entrepreneurship (RISE) Jhansi aspires to synergise startups, innovators, MSMEs, corporations, governments, academia and investors to drive transformative change.
+          <p className="text-xl text-gray-500 font-medium">
+            Everything you need to transform your raw idea into a scalable, fundable, and globally recognized enterprise.
           </p>
         </div>
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[30px]">
+        {/* Breathtaking Masonry/Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {servicesData.map((service, index) => (
             <div 
               key={service.id}
               ref={(el) => (cardsRef.current[index] = el)}
-              // Note: Removed overflow-hidden from here and added hover:z-50 so the pop-out image overlaps other cards
-              className="bg-white rounded-[20px] shadow-[0_5px_15px_rgba(0,0,0,0.05)] border border-[#eee] group hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(255,32,32,0.1)] transition-all duration-500 flex flex-col opacity-0 relative z-10 hover:z-50"
+              className="group relative h-[400px] rounded-[2rem] overflow-hidden bg-white shadow-lg cursor-pointer"
             >
-              {/* Animated Top Border on Hover */}
-              <div className="absolute top-0 left-0 w-full h-[4px] bg-[#ff2020] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 z-20 rounded-t-[20px]"></div>
-
-              {/* Image Container - Added group/img to target image hover specifically */}
-              <div className="relative h-[220px] w-full rounded-t-[20px] group/img cursor-pointer">
-                
-                {/* 1. Base Image (Clips to card boundary) */}
-                <div className="absolute inset-0 overflow-hidden rounded-t-[20px]">
-                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-500 z-10"></div>
-                  <img 
-                    src={service.image} 
-                    alt={service.title} 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* 2. Pop-out Image (Breaks outside the card boundary on hover) */}
+              {/* Background Image Container */}
+              <div className="absolute inset-0 w-full h-full">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/90 z-10 transition-opacity duration-500 group-hover:opacity-90"></div>
                 <img 
                   src={service.image} 
                   alt={service.title} 
-                  // Scales up by 1.25, becomes fully opaque, and adds a nice 3D shadow
-                  className="absolute inset-0 w-full h-full object-cover rounded-t-[20px] opacity-0 group-hover/img:opacity-100 group-hover/img:scale-[1.25] group-hover/img:rounded-[15px] group-hover/img:shadow-[0_30px_60px_rgba(0,0,0,0.3)] transition-all duration-500 z-50 pointer-events-none"
+                  className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
                 />
               </div>
-              
-              {/* Card Content */}
-              {/* Added rounded-b-[20px] to preserve card shape since overflow-hidden was removed */}
-              <div className="p-[30px] flex flex-col flex-grow bg-white rounded-b-[20px] z-10 relative">
-                <h3 className="text-[1.25rem] font-extrabold text-[#333] mb-3 group-hover:text-[#ff2020] transition-colors duration-300 leading-snug">
+
+              {/* Number Badge */}
+              <div className="absolute top-6 right-6 z-20 w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 text-white font-black text-xl transition-transform duration-300 group-hover:scale-110 group-hover:bg-[#ff2020] group-hover:border-[#ff2020]">
+                0{service.id}
+              </div>
+
+              {/* Text Content - Rises on Hover */}
+              <div className="absolute inset-x-0 bottom-0 z-20 p-8 flex flex-col justify-end h-full transform translate-y-8 transition-transform duration-500 group-hover:translate-y-0">
+                <h3 className="text-2xl font-black text-white mb-3 leading-tight drop-shadow-md">
                   {service.title}
                 </h3>
-                <p className="text-[#666] text-[0.95rem] leading-relaxed flex-grow">
-                  {service.desc}
-                </p>
+                <div className="overflow-hidden">
+                  <p className="text-gray-300 font-medium leading-relaxed opacity-0 transform translate-y-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0">
+                    {service.desc}
+                  </p>
+                </div>
+                {/* Custom Action Arrow */}
+                <div className="w-10 h-10 mt-6 rounded-full bg-white/10 flex items-center justify-center opacity-0 transform translate-y-4 transition-all duration-500 delay-100 group-hover:opacity-100 group-hover:translate-y-0 border border-white/20 group-hover:bg-[#ff2020] group-hover:border-[#ff2020]">
+                  <ArrowRight className="w-5 h-5 text-white" />
+                </div>
               </div>
             </div>
           ))}

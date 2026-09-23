@@ -1,12 +1,13 @@
+// ==========================================
+// 2. About.jsx
+// ==========================================
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { CheckCircle, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ArrowRight } from 'lucide-react';
 
-// Import image directly from src/img folder
 import aboutImg from '../../img/about_.png';
 
-// Register ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
@@ -17,135 +18,105 @@ const About = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      
-      // 1. Text sliding in from the left
-      gsap.from(textContainerRef.current, {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-          toggleActions: "play none none reverse",
-        },
-        x: -50,
-        opacity: 0,
-        duration: 1.2,
-        ease: "power4.out"
-      });
+      // Text Content Reveal
+      gsap.fromTo(textContainerRef.current.children, 
+        { y: 40, opacity: 0 },
+        {
+          scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
+          y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: "power3.out"
+        }
+      );
 
-      // 2. Image sliding in from the right with a slight scale
-      gsap.from(imageContainerRef.current, {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-          toggleActions: "play none none reverse",
-        },
-        x: 60,
-        scale: 0.9,
-        opacity: 0,
-        duration: 1.5,
-        ease: "back.out(1.2)"
-      });
+      // Image Container Reveal with Parallax Scale
+      gsap.fromTo(imageContainerRef.current, 
+        { x: 100, scale: 0.8, opacity: 0 },
+        {
+          scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
+          x: 0, scale: 1, opacity: 1, duration: 1.2, ease: "expo.out"
+        }
+      );
 
-      // 3. Staggered reveal for the feature list
-      gsap.from(listItemsRef.current, {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 75%",
-          toggleActions: "play none none reverse",
-        },
-        y: 20,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.15,
-        ease: "power3.out",
-        delay: 0.4
-      });
-      
+      // List Items Stagger
+      gsap.fromTo(listItemsRef.current, 
+        { x: -30, opacity: 0 },
+        {
+          scrollTrigger: { trigger: sectionRef.current, start: "top 65%" },
+          x: 0, opacity: 1, duration: 0.6, stagger: 0.15, ease: "back.out(1.5)"
+        }
+      );
     }, sectionRef);
 
-    return () => ctx.revert(); // Cleanup on unmount
+    return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-20 lg:py-28 bg-[#fdfdfd] overflow-hidden font-['Poppins',sans-serif]" id="about">
+    <section ref={sectionRef} className="py-24 lg:py-32 bg-white overflow-hidden font-['Poppins',sans-serif]" id="about">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           
-          {/* Left Side - Text & Content */}
-          <div ref={textContainerRef} className="space-y-6 z-10">
-            {/* Theme Badge */}
-            <div className="inline-block px-[16px] py-[6px] rounded-full bg-[#fff5f5] border border-[#ff2020]/20 text-[#ff2020] font-semibold text-sm shadow-sm">
-              Know About Us
+          {/* Left Side - Content */}
+          <div ref={textContainerRef} className="space-y-8 z-10">
+            <div className="inline-flex items-center gap-2">
+              <span className="w-8 h-[2px] bg-[#ff2020]"></span>
+              <span className="text-[#ff2020] font-black tracking-widest uppercase text-sm">Know About Us</span>
             </div>
             
-            {/* Headline */}
-            <h2 className="text-[2.5rem] md:text-[3rem] lg:text-[3.5rem] font-extrabold text-[#333] tracking-tight leading-[1.15]">
+            <h2 className="text-[3rem] md:text-[4rem] font-black text-[#1a1a1a] tracking-tight leading-[1.1]">
               Driving Transformative <br />
-              <span className="text-[#ff2020] relative after:content-[''] after:absolute after:bottom-[5px] after:left-0 after:w-full after:h-[12px] after:bg-[#ff2020]/10 after:z-[-1]">
-                Change in Bundelkhand
-              </span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff2020] to-rose-500">Change in Bundelkhand</span>
             </h2>
             
-            {/* Red Accent Divider */}
-            <div className="w-[80px] h-[5px] bg-[#ff2020] rounded-full mt-4 mb-6"></div>
-            
-            {/* Paragraphs */}
-            <p className="text-[1.1rem] text-[#555] leading-relaxed">
+            <p className="text-xl text-gray-500 leading-relaxed font-medium">
               Rani Laxmibai Incubator for Sustainable Entrepreneurship (RISE) Jhansi aspires to synergise startups, innovators, MSMEs, corporations, governments, academia, and investors.
             </p>
-            <p className="text-[1.1rem] text-[#555] leading-relaxed mb-6">
-              Our innovation ecosystem promises to stand firmly on various services, bridging the gap between raw ideas and successful enterprises.
+            <p className="text-lg text-gray-400 leading-relaxed">
+              Our innovation ecosystem bridges the gap between raw ideas and successful enterprises through world-class infrastructure and guidance.
             </p>
 
-            {/* Key Highlights List */}
-            <ul className="space-y-4 mb-8 mt-6">
+            <ul className="space-y-5 pt-4">
               {[
                 "Mentorship & Strategic Guidance",
                 "Access to Funding & Investors",
                 "State-of-the-Art Co-working Space"
               ].map((item, index) => (
-                <li 
-                  key={index}
-                  ref={(el) => (listItemsRef.current[index] = el)}
-                  className="flex items-center text-[#333] font-semibold text-[1.05rem]"
-                >
-                  <CheckCircle className="w-6 h-6 text-[#ff2020] mr-4 flex-shrink-0" />
+                <li key={index} ref={(el) => (listItemsRef.current[index] = el)} className="flex items-center text-[#1a1a1a] font-bold text-lg bg-gray-50 p-4 rounded-2xl border border-gray-100 hover:border-[#ff2020]/30 transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-[#ff2020]/10 flex items-center justify-center mr-4">
+                    <CheckCircle2 className="w-6 h-6 text-[#ff2020]" />
+                  </div>
                   {item}
                 </li>
               ))}
             </ul>
             
-            {/* Button */}
-            <button className="flex items-center mt-8 px-[35px] py-[15px] bg-transparent text-[#333] border-2 border-[#333] rounded-[50px] font-semibold shadow-sm hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:bg-[#333] hover:text-white hover:-translate-y-1 transition-all duration-300 group">
-              Discover Our Journey
-              <ArrowRight className="ml-2 w-5 h-5 transform group-hover:translate-x-1 transition-transform" />
+            <button className="group relative inline-flex items-center justify-center px-10 py-5 bg-[#1a1a1a] text-white rounded-full font-bold text-lg overflow-hidden transition-all hover:shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
+              <div className="absolute inset-0 w-full h-full bg-[#ff2020] origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100"></div>
+              <span className="relative z-10 flex items-center gap-3">
+                Discover Our Journey <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </span>
             </button>
           </div>
 
-          {/* Right Side - Image with Floating Gradients */}
-          <div ref={imageContainerRef} className="relative group lg:ml-8 mt-12 lg:mt-0">
-            {/* Decorative background blocks - Changed to Theme Red */}
-            <div className="absolute -inset-4 bg-[#ff2020]/10 rounded-[20px] transform rotate-3 group-hover:rotate-1 transition-transform duration-700 -z-10 blur-xl"></div>
-            <div className="absolute -inset-4 bg-[#ff2020]/5 rounded-[20px] transform -rotate-2 group-hover:-rotate-1 transition-transform duration-700 -z-10"></div>
+          {/* Right Side - Image & Decor */}
+          <div ref={imageContainerRef} className="relative group lg:pl-10">
+            {/* Abstract Geometry Behind */}
+            <div className="absolute top-10 -right-10 w-full h-full bg-gray-100 rounded-[3rem] -z-10 transition-transform duration-500 group-hover:rotate-3"></div>
+            <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-[#ff2020]/10 rounded-full blur-[60px] -z-10"></div>
             
-            {/* Image Container */}
-            <div className="relative rounded-[20px] overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.1)] border-4 border-white bg-white">
-              {/* Overlay on hover */}
-              <div className="absolute inset-0 bg-black/10 mix-blend-overlay z-10 transition-opacity duration-500 group-hover:opacity-0"></div>
-              <img 
-                src={aboutImg} 
-                alt="About RISE Jhansi" 
-                className="w-full h-auto object-cover transform transition-transform duration-1000 group-hover:scale-105"
-              />
-            </div>
-
-            {/* Floating Stats Badge */}
-            <div className="absolute -bottom-8 -left-6 lg:-left-10 bg-white p-5 rounded-[15px] shadow-[0_15px_35px_rgba(0,0,0,0.08)] border border-slate-100 flex items-center space-x-4 z-20 hover:-translate-y-2 transition-transform duration-300 cursor-default">
-              <div className="w-16 h-16 rounded-full bg-[#ff2020] flex items-center justify-center text-white font-extrabold text-2xl shadow-inner">
-                10+
-              </div>
-              <div>
-                <p className="text-[#333] font-extrabold text-[1.15rem] leading-tight">Startups</p>
-                <p className="text-sm text-[#666] font-medium mt-0.5">Incubated Successfully</p>
+            <div className="relative rounded-[3rem] overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.1)] border-8 border-white bg-white">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
+              <img src={aboutImg} alt="About RISE" className="w-full h-[600px] object-cover transform transition-transform duration-1000 group-hover:scale-105" />
+              
+              {/* Rotating Stamp Overlay */}
+              <div className="absolute top-8 right-8 w-32 h-32 bg-white/90 backdrop-blur-md rounded-full shadow-2xl flex items-center justify-center z-20">
+                <svg viewBox="0 0 100 100" className="w-full h-full animate-[spin_10s_linear_infinite]">
+                  <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="none" />
+                  <text className="text-[14px] font-black uppercase tracking-widest fill-[#ff2020]">
+                    <textPath href="#circlePath">Innovate • Empower • Scale •</textPath>
+                  </text>
+                </svg>
+                <div className="absolute w-12 h-12 bg-[#ff2020] rounded-full flex items-center justify-center">
+                  <ArrowRight className="w-6 h-6 text-white -rotate-45" />
+                </div>
               </div>
             </div>
           </div>

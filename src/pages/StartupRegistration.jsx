@@ -112,10 +112,11 @@ export default function StartupRegistration() {
             isValid = false;
         }
 
-        if (!captchaToken) {
-            newErrors.recaptcha = 'Please verify that you are not a robot';
-            isValid = false;
-        }
+        // YAHAN SE CAPTCHA KI MANDATORY CONDITION HATA DI GAYI HAI
+        // if (!captchaToken) {
+        //     newErrors.recaptcha = 'Please verify that you are not a robot';
+        //     isValid = false;
+        // }
 
         if (Date.now() / 1000 - submissionTime < 3) {
             isValid = false; // Bot detection
@@ -172,7 +173,8 @@ export default function StartupRegistration() {
             payloadAPI2.append('sector', formData.industry);
             payloadAPI2.append('service', formData.elevatorPitch);
             payloadAPI2.append('dpiit_no', formData.dpiitNo);
-            payloadAPI2.append('g-recaptcha-response', captchaToken);
+            // Yahan fallback add kiya gaya hai takki null na jaye
+            payloadAPI2.append('g-recaptcha-response', captchaToken || '');
             payloadAPI2.append('submission_time', submissionTime);
 
             try {
@@ -307,10 +309,11 @@ export default function StartupRegistration() {
                                     <select name="stage" className={`${inputStyle} ${errors.stage ? 'border-[#ff2020]' : ''}`} value={formData.stage} onChange={handleChange}>
                                         <option value="">Select Stage</option>
                                         <option value="Ideation">Ideation</option>
-                                        <option value="MVP">MVP / Proof of Concept</option>
-                                        <option value="Beta_Launched">Beta Launched</option>
-                                        <option value="Early_Revenues">Early Revenues</option>
-                                        <option value="Steady_Revenues">Steady Revenues</option>
+                                        <option value="Validation">Validation</option>
+                                        <option value="First Traction">First Traction</option>
+                                        <option value="Early Traction">Early Traction</option>
+                                        <option value="Product-Market Fit">Product-Market Fit</option>
+                                        <option value="Growth">Growth</option>
                                     </select>
                                     {errors.stage && <p className={errorStyle}>{errors.stage}</p>}
                                 </div>
@@ -415,7 +418,8 @@ export default function StartupRegistration() {
 
                         {/* --- 5. SECURITY --- */}
                         <div className="mt-8 bg-[#f8f9fa] p-6 rounded-[10px] border border-[#eee]">
-                            <label className={labelStyle}>Security Verification <span className="text-[#ff2020] ml-1">*</span></label>
+                            {/* Yahan (Optional) tag add kar diya gaya hai */}
+                            <label className={labelStyle}>Security Verification <span className="text-[#aaa] font-normal ml-1">(Optional)</span></label>
                             <div className="mt-3">
                                 {/* FIXED: Replaced live domain key with official Google testing sitekey to work on localhost */}
                                 <ReCAPTCHA
@@ -423,16 +427,16 @@ export default function StartupRegistration() {
                                 sitekey={import.meta.env.VITE_RECAPTCHA_KEY}
                                 onChange={handleRecaptcha}
                             />
-                                {errors.recaptcha && <p className={errorStyle}>{errors.recaptcha}</p>}
                             </div>
                         </div>
 
                         {/* --- 6. SUBMIT --- */}
                         <div className="mt-10 text-center">
+                            {/* Yahan Button ki styling update ki gayi hai (border-2 border-[#ff2020] added) */}
                             <button 
                                 type="submit" 
                                 disabled={isSubmitting}
-                                className="inline-flex items-center justify-center px-[50px] py-[18px] bg-[#ff2020] hover:bg-[#d81c28] text-white font-bold rounded-[50px] text-[1.1rem] shadow-[0_10px_20px_rgba(255,32,32,0.25)] transition-all disabled:opacity-70 disabled:cursor-not-allowed hover:-translate-y-1"
+                                className="inline-flex items-center justify-center px-[50px] py-[18px] bg-[#ff2020] hover:bg-[#d81c28] text-white font-bold rounded-[50px] text-[1.1rem] shadow-[0_10px_20px_rgba(255,32,32,0.25)] border-2 border-[#ff2020] transition-all disabled:opacity-70 disabled:cursor-not-allowed hover:-translate-y-1"
                             >
                                 {isSubmitting ? (
                                     <><span className="inline-block w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin mr-[10px] align-middle"></span> Processing...</>

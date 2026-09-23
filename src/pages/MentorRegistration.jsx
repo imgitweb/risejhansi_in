@@ -26,8 +26,8 @@ export default function MentorRegistration() {
     category: 'Tech',
     gender: 'male',
     institute: '',
-    country: '', // Changed to store string names
-    state: '',   // Changed to store string names
+    country: '', 
+    state: '',   
     city: '', 
     linkedin_url: '',
     specializationIn: '',
@@ -121,10 +121,11 @@ export default function MentorRegistration() {
       isValid = false;
     }
 
-    if (!captchaToken) {
-      newErrors.recaptcha = 'Verify captcha';
-      isValid = false;
-    }
+    // YAHAN SE CAPTCHA VALIDATION HATA DIYA GAYA HAI
+    // if (!captchaToken) {
+    //   newErrors.recaptcha = 'Verify captcha';
+    //   isValid = false;
+    // }
 
     setErrors(newErrors);
     return isValid;
@@ -168,12 +169,13 @@ export default function MentorRegistration() {
       risePayload.append('name', formData.name);
       risePayload.append('email', formData.email);
       risePayload.append('mobile', formData.mobile);
-      risePayload.append('country', formData.country); // Sending string Name instead of ID
+      risePayload.append('country', formData.country);
       risePayload.append('state', formData.state);
       risePayload.append('city', formData.city);
       risePayload.append('linkedin_url', formData.linkedin_url);
       risePayload.append('no_of_mentor_year', formData.totalExp);
-      risePayload.append('captcha', captchaToken);
+      // Fallback add kiya hai taki null pass na ho
+      risePayload.append('captcha', captchaToken || ''); 
       
       // Dynamic Checkbox mapping for RiseJhansi API
       if (selectedSkills.includes('IT Expert')) risePayload.append('is_it_expert', 1);
@@ -384,10 +386,10 @@ export default function MentorRegistration() {
 
             {/* Google reCAPTCHA */}
             <div className="mb-8 bg-[#f8f9fa] p-6 rounded-[10px] border border-[#eee]">
-              <label className={labelStyle}>Security Verification <span className="text-[#ff2020] ml-1">*</span></label>
+              {/* Yahan (Optional) likh diya gaya hai */}
+              <label className={labelStyle}>Security Verification <span className="text-[#aaa] font-normal ml-1">(Optional)</span></label>
               <div className="mt-3">
                 <ReCAPTCHA ref={recaptchaRef} sitekey="6LfBFPMqAAAAAP1IRHgKSJJWbr9NkcIaSqG7AROC" onChange={handleRecaptcha} />
-                {errors.recaptcha && <p className={errorStyle}>{errors.recaptcha}</p>}
               </div>
             </div>
 
