@@ -1,6 +1,3 @@
-// ==========================================
-// 2. About.jsx
-// ==========================================
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -107,11 +104,16 @@ const About = () => {
               <img src={aboutImg} alt="About RISE" className="w-full h-[600px] object-cover transform transition-transform duration-1000 group-hover:scale-105" />
               
               {/* Rotating Stamp Overlay */}
-              <div className="absolute top-8 right-8 w-32 h-32 bg-white/90 backdrop-blur-md rounded-full shadow-2xl flex items-center justify-center z-20">
-                <svg viewBox="0 0 100 100" className="w-full h-full animate-[spin_10s_linear_infinite]">
-                  <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="none" />
-                  <text className="text-[14px] font-black uppercase tracking-widest fill-[#ff2020]">
-                    <textPath href="#circlePath">Innovate • Empower • Scale •</textPath>
+              <div className="absolute top-8 right-8 w-36 h-36 bg-white/90 backdrop-blur-md rounded-full shadow-2xl flex items-center justify-center z-20">
+                <svg viewBox="0 0 100 100" className="w-full h-full animate-[spin_12s_linear_infinite]">
+                  {/* Circle path radius chhota kiya gaya (35) taki spacing aur clear mile */}
+                  <path id="circlePath" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="none" />
+                  
+                  {/* Font size 9px aur letter spacing badha di gayi hai */}
+                  <text className="text-[9px] font-black uppercase tracking-[0.2em] fill-[#ff2020]">
+                    <textPath href="#circlePath" startOffset="0%">
+                      {'INNOVATE • EMPOWER • SCALE • '}
+                    </textPath>
                   </text>
                 </svg>
                 <div className="absolute w-12 h-12 bg-[#ff2020] rounded-full flex items-center justify-center">
