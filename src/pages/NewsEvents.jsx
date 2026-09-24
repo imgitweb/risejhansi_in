@@ -2,13 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 // यहाँ से Instagram को हटा दिया गया है
-import { Calendar, Settings, ArrowRight, X, Heart, MessageCircle, ExternalLink, ChevronLeft, ChevronRight, Image as ImageIcon, PlayCircle } from 'lucide-react';
+import { Calendar, Settings, ArrowRight, X, Heart, MessageCircle, ExternalLink, ChevronLeft, ChevronRight, Image as ImageIcon, PlayCircle, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 import API_URL from "../components/Config";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Custom Instagram SVG Icon (अब lucide-react की ज़रूरत नहीं)
+// Custom Instagram SVG Icon
 const InstagramIcon = ({ className }) => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
@@ -41,12 +41,16 @@ const NewsEvents = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const POSTS_PER_PAGE = 30;
+  
+  
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_URL}/instagram/posts?page=${currentPage}&limit=${POSTS_PER_PAGE}`);
+        // Explicitly sending the incubationId to the backend
+        const incubationId = "6a74ea248ade09560b5dc48c";
+        const response = await axios.get(`${API_URL}/instagram/posts?page=${currentPage}&limit=${POSTS_PER_PAGE}&incubationId=${incubationId}`);
         
         if (response.data && response.data.success) {
           setPosts(response.data.data);
