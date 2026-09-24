@@ -2,8 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 
 // Import images directly from your src/img folder
-import risehome from '../../img/risehome.png';
-import risehome1 from '../../img/risehome1.png';
+import risehome from '../../img/home.png';
+import risehome1 from '../../img/home1.png';
 
 const Hero = () => {
   const heroRef = useRef(null);
